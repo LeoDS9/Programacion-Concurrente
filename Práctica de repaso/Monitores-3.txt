@@ -1,0 +1,27 @@
+process Escalador[id: 0..29]{
+    Paso.llegar(id);
+    //usar Paso
+    Paso.liberar();
+}
+
+monitor Paso{
+    int esperando = 0;
+    cond espera;
+    bool libre = true;
+
+    Procedure llegar(){
+        if (not libre){
+            esperando++;
+            wait(espera);
+        }
+        else libre = false;
+    }
+
+    Procedure liberar(){
+        if (esperando > 0){
+            esperando--;
+            signal(espera);
+        }
+        else libre = true;
+    }
+}

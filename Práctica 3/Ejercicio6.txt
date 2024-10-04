@@ -1,0 +1,69 @@
+process alumno[id: 0..49]{
+    int nroG, puntaje;
+    Tarea.llegar(id,nroG);
+    //realizar tarea
+    Tarea.terminarTarea(nroG, puntaje);
+}
+
+
+process jtp{
+    int puntaje = 25, terminaron[25] = ([25] 0);
+    int i,nro;
+    Tarea.esperarAlumnos();
+    for i = 1..50
+        Tarea.proximo();
+    for i = 1..50{
+        Tarea.esperarTarea(nro);
+        terminaron[nro]++;
+        if (terminaron[nro] == 2){
+            Tarea.darNota(nro, puntaje);
+            puntaje--;
+        }
+    }
+}
+
+monitor Tarea{
+    int total = 0, nums[50], notas[25];
+    cond esperaJ, esperaN[50], esperarNota[25];
+    Cola c, final;
+
+    Procedure llegar(id: in int, n: out int){
+        total++;
+        Push(c,id);
+        if (total == 50){
+            signal(esperaJ);
+        }
+        wait(esperaN[id]);
+        n = nums[id]
+    }
+
+    Procedure esperarAlumnos(){
+        if (total < 50)
+            wait(esperaJ);
+    }
+
+    Procedure proximo(){
+        int id;
+        Pop(c,id);
+        nums[id] = AsignarNroGrupo();
+        signal(esperaN[id]);
+    }
+    
+    Procedure terminarTarea(nroG: in int, puntaje: out int){
+        Push(final,nroG);
+        signal(esperaJ);
+        wait(esperarNota[nroG]);
+        puntaje = notas[nroG];
+    }
+
+    Procedure esperarTarea(nGrupo: out int){
+        if (Empty(final))
+            wait(esperaJ);
+        Pop(final,nGrupo);
+    }
+
+    Procedure darNota(nGrupo: in int, p: in int){
+        notas[nGrupo] = p;
+        signal_all(esperarNota[nGrupo]);
+    }
+}

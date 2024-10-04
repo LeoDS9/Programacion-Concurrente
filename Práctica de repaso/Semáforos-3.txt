@@ -1,0 +1,45 @@
+int latas = 100, esperando = 0;
+Cola cola;
+sem mutex = 1, maquina = 1, reponer = 0, esperar[U] = ([U] 0), listo = 0;
+bool libre = true;
+
+process Usuario[id:0..U-1]{
+    int aux;
+
+    P(mutex);
+    if(!libre){
+        Push(cola,id);
+        esperando++;
+        V(mutex);
+        P(esperar[id]);
+    }
+    else{
+        libre = false;
+        V(mutex);
+    }
+
+    if(latas == 0){
+        V(reponer);
+        P(listo);
+    }
+    //sacar lata
+    latas--;
+    
+    P(mutex);
+    if(esperando > 0){
+        esperando--;
+        Pop(cola,aux);
+        V(esperar[aux]);
+    }
+    else libre = true;
+    V(mutex);
+}
+
+process Repositor{
+    while(true){
+        P(reponer);
+        //reponer latas
+        latas = 100;
+        V(listo);
+    }
+}

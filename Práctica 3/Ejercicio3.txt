@@ -1,0 +1,190 @@
+a)
+Process Persona [id:0..N-1]{
+    Documento documento; 
+    Fotocopia fotocopia;
+
+    Fotocopiadora.Fotocopiar(documento, fotocopia);
+}
+
+Monitor Fotocopiadora {
+
+    Procedure fotocopiar(Documento: in text, Fotocopia out text){
+        Fotocopia = scan(documento);
+    }
+}
+
+
+b)
+Process Persona [id:0..N-1]{
+    Documento documento; 
+    Fotocopia fotocopia;
+    Fotocopia.usarFotocopia();
+    Fotocopiar(documento,fotocopia);
+    Fotocopiadora.dejarFotocopiadora();
+}
+
+Monitor Fotocopiadora {
+    int esperando = 0;
+    cond espera;
+    bool libre = true;
+    Procedure usarFotocopiadora(){
+        if(not libre){
+            esperando++;
+            wait(espera);
+        }
+        else
+            libre = false;
+    }
+    Procedure dejarFotocopiadora(){
+        if (esperando > 0){
+            esperando--;
+            signal(espera);
+        }
+        else
+            libre = true;
+    }
+}
+
+
+
+c)
+Process Persona [id:0..N-1]{
+    Documento documento; 
+    Fotocopia fotocopia;
+    int edad;
+    Fotocopia.usarFotocopia(id,edad);
+    Fotocopiar(documento,fotocopia);
+    Fotocopiadora.dejarFotocopiadora();
+}
+
+Monitor Fotocopiadora {
+    int esperando = 0;
+    cond espera[N];
+    bool libre = true;
+    Cola cola;
+    Procedure usarFotocopiadora(id: in int, edad: in int){
+        if(not libre){
+            esperando++;
+            Push(cola,id,edad);
+            wait(espera[id]);
+        }
+        else
+            libre = false;
+    }
+    Procedure dejarFotocopiadora(){
+        if (esperando > 0 ) { 
+            esperando --;
+            Pop(fila, idAux);
+            signal(espera[idAux]);
+        }
+        else
+            libre = true;
+    }
+}
+
+d)
+Process Persona [id:0..N-1]{
+    Documento documento; 
+    Fotocopia fotocopia;
+
+    Fotocopiadora.usarFotocopiadora(id);
+    Fotocopiar(documento,fotocopia);
+    Fotocopiadora.dejarFotocopiadora();
+}
+
+Monitor Fotocopiadora{
+    int proximo = 0;
+    int cv[n];
+
+    Procedure usarFotocopiadora(id: in int){
+        if (idP != proximo) {
+            wait(cv[idP]);
+        }
+    }
+
+    Procedure dejarFotocopiadora(){
+        proximo++;
+        signal(cv[proximo]);
+    }
+}
+
+e)
+Process Persona [id:0..N-1]{
+    Documento documento; 
+    Fotocopia fotocopia;
+    Fotocopia.usarFotocopiadora();
+    Fotocopiar(documento,fotocopia);
+    Fotocopiadora.dejarFotocopiadora();
+}
+
+process Empleado{
+    for int i = 0 .. N-1{
+        asignar()
+
+    }
+}
+
+Monitor Fotocopiadora {
+    int esperando = 0;
+    cond espera, empl, fin;
+
+    Procedure usarFotocopiadora(){
+        signal(empl);
+        esperando++;
+        wait(espera);
+    }
+    Procedure asignar(){
+        if (esperando == 0)
+            wait(empl);
+        esperando--;
+        signal(espera);
+        wait(fin);
+    }
+    Procedure dejarFotocopiadora(){
+        signal(fin);
+    }
+}
+
+f)
+Process Persona [id:0..N-1]{
+    Documento documento; 
+    Fotocopia fotocopia;
+    Fotocopia.usarFotocopiadora(id);
+    Fotocopiar(documento,fotocopia, fotocopiadoraAsignada);
+    Fotocopiadora.dejarFotocopiadora();
+}
+
+process Empleado{
+    for int i = 0 .. N-1{
+        asignar()
+    }
+}
+
+Monitor Fotocopiadora {
+    cond espera, empl, esperandoF;
+    Cola fotocopiadoras, cola;
+    int asignada[N];
+    
+    Procedure usarFotocopiadora(id: in int, fotocopiadoraAsignada: out int){
+        signal(empl);
+        Push(cola,id);
+        wait(espera);
+        fotocopiadoraAsignada = asignada[id];
+    }
+    Procedure asignar(){
+        if (Empty(cola)){
+            wait(empl);
+        }
+        int aux;
+        Pop(cola,aux);
+        if (Empty(fotocopiadoras)){
+            wait(esperandoF);
+        }
+        Pop(fotocopiadoras, asignada[aux]);
+        signal(espera);
+    }
+    Procedure dejarFotocopiadora(fotocopiadoraAsignada){
+        Push(fotocopiadoras,fotocopiadoraAsignada);
+        signal(esperandoF);
+    }
+}

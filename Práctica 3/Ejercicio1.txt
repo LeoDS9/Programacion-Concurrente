@@ -1,0 +1,17 @@
+a) Si, es una solución correcta, ya que cuando un auto va a pasar va llamar al procedimiento de Puente entrarPuente() y va a incrementar la variable cant, 
+mientras esa variable sea mayor a 0, el resto de autos van a esperar dormidos y recién cuando el auto que esta cruzando llame a salirPuente() y disminuya 
+la variable cant, va a despertar a un auto que está esperando para cruzar. Este va a incrementar la variable cant y va a cruzar, y así sucesivamente.
+
+b) Sí, se puede simplificar haciendo que el monitor represente el cruce del puente. Esto se debe a la exclusión mutua que proveen los monitores.
+
+Monitor Puente {
+    Procedure cruzarPuente (){
+        //el auto cruza el puente
+    }
+}
+
+Process Auto [a:1..M]{
+    Puente.cruzarPuente();
+}
+
+c) Ninguna de las dos soluciones respeta el orden de llegada, sino que se hace uso de la exclusión mutua.

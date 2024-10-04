@@ -1,0 +1,21 @@
+b) 
+Monitor BaseDeDatos {
+    int nr = 0; 
+    cond cv;
+
+    Procedure pasar(){
+        while(nr == 5) wait(cv); 
+        nr++;
+    }
+
+    Procedure salir(){
+        nr--;
+        signal(cv);
+    }
+}
+
+Process Proceso [p:1..N]{
+    BaseDeDatos.pasar();
+    //leer base de datos
+    BaseDeDatos.salir();
+}

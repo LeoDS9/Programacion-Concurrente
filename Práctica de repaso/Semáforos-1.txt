@@ -1,0 +1,71 @@
+a)
+Cola cola;
+sem mutex = 1, acceder[P] = ([P] 0);
+bool libre = true;
+
+process Persona[id: 0..P-1]{
+    int aux;
+    P(mutex);
+    if (not libre){
+        Push(cola,id);
+        V(mutex);
+        P(acceder[id])
+    }
+    else{
+        libre = false;
+        V(mutex);
+    }
+    UsarTerminal();
+    P(mutex);
+    if (not Empty(cola)){
+        Pop(cola,aux);
+        V(acceder[aux])
+    }
+    else libre = true;
+    V(mutex);
+}
+
+b)
+Cola cola, terminales;
+sem mutex = 1, mutexTerm = 1, acceder[P] = ([P] 0);
+int cantTerms = T, esperando = 0;
+
+process Persona[id: 0..P-1]{
+    int term,aux;
+    P(mutex);
+    if (cantTerms == 0){
+        esperando++;
+        Push(cola,id);
+        V(mutex);
+        P(acceder[id])
+    }
+    else{
+        cantTerms--;
+        V(mutex);
+    }
+    
+    P(mutexTerm)
+    Pop(terminales,term);
+    V(mutexTerm)
+
+    UsarTerminal(term);
+
+    P(mutexTerm)
+    Push(terminales,term);
+    V(mutexTerm);
+
+    P(mutex);
+    if(esperando > 0){
+        esperando--;
+        Pop(cola,aux);
+        V(acceder[aux]);
+    }
+    else
+        cantTerms++;
+    V(mutex);
+
+    
+}
+
+
+

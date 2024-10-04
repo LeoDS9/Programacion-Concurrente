@@ -1,0 +1,40 @@
+Transaccion transacciones[10000];
+int pos = 0, validadas = 0, contador[10] = ([10] 0);
+sem mutex = 1, mutexT = 1, mutexFuncion = 1, mutexCont = 1;
+bool fin = false;
+
+process worker[id: 0..6]{
+    Transaccion t;
+    int res;
+
+    P(mutex)
+    while (validadas < 10000){
+        validadas++;
+        V(mutex);
+
+        P(mutexT);
+        t = transacciones[pos];
+        pos = (pos+1) mod 10000;
+        V(mutexT);
+
+
+        P(mutexFuncion);
+        res = Validar(t);
+        V(mutexFuncion)
+
+        P(mutexCont);
+        contador[res]++;
+        V(mutexCont);
+
+       
+        P(mutex);
+        if (validadas == 10000){
+            for int i = 0..9 -> println(contador[i]);
+        }
+        V(mutex);
+       
+
+        P(mutex)
+    }
+    V(mutex);
+}

@@ -1,0 +1,34 @@
+process vehiculo[id: 0..N-1]{
+    int peso;
+    Puente.pasar(peso);
+    //pasa por el Puente
+    Puente.salir(peso);
+}
+
+monitor Puente{
+    int acumulado = 0, esperando = 0;
+    cond esperar, pasar;
+    bool libre = true;
+    Procedure pasar(peso: in int){
+        if (not libre){
+            esperando++;
+            wait(esperar);
+        }
+        else
+            libre = false;
+        while (acumulado + peso > 50000){
+            wait(pasar);
+        }
+        acumulado += peso;
+        if (esperando > 0){
+            esperando--;
+            signal(esperar)
+        }
+        else
+            libre = true;
+    }
+    Procedure salir(peso: in int){
+        acumulado-= peso;
+        signal(pasar)
+    }
+}

@@ -1,0 +1,188 @@
+a)
+process Persona[id: 0..N-1]{
+    text lista, comprobante;
+    Corralon.atencion(lista,comprobante);
+}
+
+process Empleado{
+    text datos, comprobante;
+    for int i = 1..N{
+        Corralon.esperarDatos(datos);
+        comprobante = generar comprobante
+        Corralon.entregarComprobante(comprobante);
+    }
+}
+
+monitor Corralon{
+    cond vcCliente, vcEmpleado, esperaDatos, esperaComp, fin;
+    text datos, resultados;
+    int esperando = 0;
+
+    Procedure atencion(lista: in text, comprobante: out text){
+        esperando++;
+        signal(vcEmpleado);
+        wait(vcCliente);
+        datos = lista;
+        signal(esperaDatos);
+        esperando--;
+        wait(esperaComp);
+        comprobante = resultados;
+        signal(fin)
+    }
+
+    Procedure esperarDatos(D: out text){
+        if (esperando == 0)
+            wait(vcEmpleado)
+        signal(vcCliente);
+        wait(esperaDatos);
+        D = datos;
+    }
+
+    Procedure entregarComprobante(C: in text){
+        resultados = C;
+        signal(esperaComp);
+        wait(fin);
+    }
+}
+
+b)
+process Persona[id: 0..N-1]{
+    text lista, comprobante;
+    int idE;
+    Corralon.llegada(idE);
+    Escritorio[idE].atencion(lista,comprobante);
+}
+
+process Empleado{
+    text datos, comprobante;
+    while(true){
+        Corralon.proximo(id);
+        Escritorio[id].esperarDatos(datos);
+        comprobante = generar comprobante
+        Escritorio[id].entregarComprobante(comprobante);
+    }
+}
+
+Monitor Corralon {
+    cola elibres;
+    cond esperaC;
+    int esperando = 0, cantLibres = 0;
+
+    Procedure llegada(idE: out int){ 
+        if (cantLibres == 0){ 
+            esperando++;
+            wait (esperaC);
+        }
+        else cantLibres--;
+        pop(elibres, idE);
+    }
+    Procedure proximo(idE: in int){ 
+        push(elibres, idE);
+        if (esperando > 0 ){ 
+            esperando --;
+            signal (esperaC);
+        }
+        else cantLibres++;
+    }
+}
+
+Monitor Escritorio[id: 0..2] {
+    cond vcCliente, vcEmpleado;
+    text datos, resultados;
+    boolean listo = false;
+
+    Procedure atencion(lista: in text, comprobante: out text){ 
+        datos = lista;
+        listo = true;
+        signal (vcEmpleado);
+        wait (vcCliente);
+        comprobante = resultados;
+        signal (vcEmpleado);
+    }
+
+    Procedure esperarDatos(D: out text){ 
+        if (not listo) wait (vcEmpleado);
+        D = datos;
+    }
+
+    Procedure entregarComprobante(C: in text){ 
+        resultados = C;
+        signal (vcCliente);
+        wait (vcEmpleado);
+        listo = false;
+    }
+}
+
+c)
+
+process Persona[id: 0..N-1]{
+    text lista, comprobante;
+    int idE;
+    Corralon.llegada(idE);
+    Escritorio[idE].atencion(lista,comprobante);
+}
+
+process Empleado{
+    text datos, comprobante;
+    bool fin = false;
+    while(!fin){
+        Corralon.proximo(id);
+        Escritorio[id].esperarDatos(datos);
+        comprobante = generar comprobante
+        Escritorio[id].entregarComprobante(comprobante, fin);
+    }
+}
+
+Monitor Corralon {
+    cola elibres;
+    cond esperaC;
+    int esperando = 0, cantLibres = 0;
+
+    Procedure llegada(idE: out int){ 
+        if (cantLibres == 0){ 
+            esperando++;
+            wait (esperaC);
+        }
+        else cantLibres--;
+        pop(elibres, idE);
+    }
+    Procedure proximo(idE: in int){ 
+        push(elibres, idE);
+        if (esperando > 0 ){ 
+            esperando --;
+            signal (esperaC);
+        }
+        else cantLibres++;
+    }
+}
+
+Monitor Escritorio[id: 0..2] {
+    cond vcCliente, vcEmpleado;
+    text datos, resultados;
+    boolean listo = false;
+    int atendidos = 0;
+
+    Procedure atencion(lista: in text, comprobante: out text){ 
+        datos = lista;
+        listo = true;
+        signal (vcEmpleado);
+        wait (vcCliente);
+        comprobante = resultados;
+        signal (vcEmpleado);
+    }
+
+    Procedure esperarDatos(D: out text){ 
+        if (not listo) wait (vcEmpleado);
+        D = datos;
+    }
+
+    Procedure entregarComprobante(C: in text, fin: out bool){ 
+        resultados = C;
+        signal (vcCliente);
+        wait (vcEmpleado);
+        listo = false;
+        atendidos++;
+        if (atendidos == N)
+            fin = true;
+    }
+}

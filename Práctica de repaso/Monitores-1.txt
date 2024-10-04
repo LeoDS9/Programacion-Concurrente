@@ -1,0 +1,45 @@
+process Persona[id: 0..N-1]{
+    int edad;
+    bool embarazada;
+    Maquina.llegar(id,edad,embarazada);
+    Votar();
+    Maquina.terminar();
+}
+
+process Autoridad{
+    while(true){
+       Maquina.esperarPersona();
+       Maquina.avisar(); 
+    }
+}
+
+monitor Maquina{
+    cond esperaP[N],esperaA,terminar;
+    ColaOrdenada cola;
+    int esperando = 0;
+
+    Procedure llegar(id: in int, edad: in int, emb: in bool){
+        Push(cola,id,edad,emb);
+        esperando++;
+        signal(esperaA);
+        wait(esperaP[id]);
+    }
+
+
+    Procedure esperarPersona(){
+        if (esperando == 0)
+            wait(esperaA);
+    }
+
+    Procedure avisar(){
+        int aux;
+        Pop(cola,aux);
+        esperando--;
+        signal(esperaP[aux]);
+        wait(terminar);
+    }
+
+    Procedure terminar(){
+        signal(terminar);
+    }
+}

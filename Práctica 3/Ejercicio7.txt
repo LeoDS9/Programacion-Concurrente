@@ -1,0 +1,69 @@
+process corredor[id: 0..C-1]{
+    Botella botella;
+    Maraton.llegar();
+    //iniciar carrera
+    Maraton.terminar(id);
+    Maquina.usarMaquina(botella);
+    Maquina.proximo();
+}
+
+process repositor{
+    while (true)
+        Maquina.reponer();
+}
+
+monitor Maraton{
+    cond iniciar, maquina;
+    Cola c;
+    int cant = 0;
+    bool libre = true;
+
+    Procedure llegar(){
+        cant++;
+        if (cant == C)
+            signal_all(iniciar);
+        else
+            wait(iniciar);
+    }
+
+    
+
+    Procedure terminar(id: in int){
+        if (not libre){
+            esperando++;
+            wait(maquina);
+        }
+        else libre = false;
+    }
+
+    Procedure proximo(){
+        if (esperando > 0 ) { 
+            esperando --;
+            signal (maquina);
+        }
+        else libre = true;
+    }
+}
+
+monitor Maquina{
+    cond esperaRepo, listo;
+    int botellas = 20;
+
+    Procedure usarMaquina(b: out Botella){
+        if(botellas == 0){
+            signal(esperaRepo);
+            wait(listo)
+        }
+        b = sacar botella
+        botellas--;
+        
+    }
+
+    Procedure reponer(){
+        if (botellas > 0)
+             wait(esperaRepo);
+        //reponer botellas
+        botellas = 20;
+        signal(listo)
+    }
+}

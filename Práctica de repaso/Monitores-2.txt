@@ -1,0 +1,34 @@
+process vendedor[id: 0..19]{
+    int miEquipo, cantVendida = 0, total;
+    Equipo[miEquipo].llegar();
+    //vender producto
+    Venta[miEquipo].cantVendida(cantVendida,total);
+}
+
+monitor Equipo[id: 0..4]{
+    int cant=0;
+    cond espera;
+
+    Procedure llegar(){
+        cant++;
+        if(cant < 4)
+            wait(espera);
+        else
+            signal_all(espera);
+    }
+}
+
+monitor Venta[id:0..4]{
+    int total = 0, cant = 0;
+    cond esperaTot;
+
+    Procedure cantVendida(cantV: in int, tot: out int){
+        total += cantV;
+        cant++;
+        if(cant < 4)
+            wait(esperaTot)
+        else
+            signal_all(esperaTot);
+        tot = total;
+    }
+}
