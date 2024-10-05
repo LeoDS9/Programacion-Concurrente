@@ -1,5 +1,6 @@
 1)
-sem mutex = 1;
+sem mutex = 1, hayPedido = 0, espera[15] = ([15] 0);
+Cola cola;
 
 process controladores[id: 0..14]{
     Temperatura t;
@@ -26,4 +27,60 @@ process modulo[id: 0..1]{
         accion[aux] = determinar(temp);
         V(espera[aux]);
     }
+}
+
+
+
+
+2)
+
+process Persona[id: 0..P-1]{
+    int entrada;
+    bool tengoEntrada = false;
+    Venta.llegar(id,entrada);
+    if (entrada != -1)
+        tengoEntrada = true;
+}
+
+process Boleteria{
+    int entrada, idP;
+
+    for int i = 1..P{
+        Venta.esperandoPersona();
+        Venta.obtenerPersona(idP);
+        entrada = Vender(idP); //si hay entradas devuelve el nro de entrada, si no devuelve -1
+        Venta.enviarNroEntrada(idP,entrada);
+    }
+}
+
+monitor Venta{
+    Cola cola;
+    cond esperaP[P], esperaB;
+    int esperando = 0, entradas[P];
+
+    process llegar(id: in int, e: out int){
+        Push(cola,id);
+        esperando++;
+        signal(esperaB);
+        wait(esperaP[id]);
+        e = entradas[id];
+    }
+
+
+    process esperandoPersona{
+        if (esperando == 0)
+            wait(esperaB);
+    }
+
+    process obtenerPersona(idP: out int){
+        Pop(cola,idP);
+        esperando--;
+    }
+
+
+    process enviarNroEntrada(idP: in int, e: in int){
+        entrada[idP] = e;
+        signal(espera[idP]);
+    }
+
 }

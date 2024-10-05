@@ -1,11 +1,9 @@
 process alumno[id: 0..44]{
     text enunciado, examen;
     int nota;
-    Examen.llegar();
-    Examen.esperarEnunciado(enunciado);
-    //resolver examen;
-    Escritorio.entregarExamen(id,examen);
-    Escritorio.esperarNota(id,nota);
+    Examen.llegar(enunciado);
+    //resolver enunciado;
+    Escritorio.entregarExamen(id,examen,nota);
 }
 
 process preceptor{
@@ -18,8 +16,7 @@ process profesora{
     int nota, idA;
     text examen;
     for int i = 1..45{
-        Escritorio.esperarExamen();
-        Escritorio.obtenerExamen(idA,examen);
+        Escritorio.esperarExamen(idA,examen);
         nota = corregirExamen(examen);
         Escritorio.darNota(idA,nota);
     }
@@ -31,13 +28,10 @@ monitor Examen{
     int cant = 0;
     text enunciado;
 
-    Procedure llegar(){
+    Procedure llegar(enun: out text){
         cant++;
         if (cant == 45)
             signal(esperaP);
-    }
-
-    Procedure esperarEnunciado(enun: out text){
         wait(esperaA);
         enun = enunciado;
     }
@@ -58,25 +52,18 @@ monitor Escritorio{
     int notas[45];
     Cola cola;
 
-    Procedure entregarExamen(id: in int, ex: in text){
-        examenes[id] = ex;
-        Push(cola,id);
+    Procedure entregarExamen(id: in int, ex: in text, n: out int){
+        Push(cola,(id,ex));
         signal(esperaProf);
-    }
-
-    Procedure esperarNota(id: in int, n: out int){
         wait(esperarNota);
         n = notas[id];
     }
 
-    Procedure esperarExamen(){
+
+    Procedure esperarExamen(idA: out int, ex: out text){
         if (Empty(cola))
             wait(esperaProf);
-    }
-
-    Procedure obtenerExamen(idA: out int, ex: out text){
-        Pop(cola,id);
-        ex = examenes[id];
+        Pop(cola,(id,ex));
     }
 
     Procedure darNota(idA: in int, n: in int){

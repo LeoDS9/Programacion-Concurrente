@@ -55,14 +55,10 @@ monitor Oficina{
     int esperando = 0;
     Resultado res[N];
 
-    Procedure llegar(id: in int, s: in Solicitud){
+    Procedure llegar(id: in int, s: in Solicitud, r: out Resultado){
         Push(cola,(id,s));
         esperando++;
         signal(esperaEmp);
-        
-    }
-
-    Procedure obtenerResultado(id: in int, r: out Resultado){
         wait(espera[id]);
         r = res[id];
     }

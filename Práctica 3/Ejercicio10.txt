@@ -7,8 +7,7 @@ process personas[id: 0..N-1]{
 process empleado{
     for int i = 1..N{
         Desinfectar_Juego();
-        Juego.avisar();
-        Juego.esperarJuego();
+        Juego.avisarPersona();
     }
 }
 
@@ -22,18 +21,11 @@ monitor Juego{
         wait(jugar);
     }
 
-    Procedure avisar(){
+    Procedure avisarPersona(){
         if (esperando == 0)
             wait(empl);
         esperando--;
         signal(jugar);
-    }
-
-    Procedure devolverJuego(){
-        signal(usado);
-    }
-
-    Procedure esperarJuego(){
         wait(usado);
     }
 }
