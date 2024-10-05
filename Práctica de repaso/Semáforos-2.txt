@@ -1,7 +1,6 @@
 Transaccion transacciones[10000];
-int pos = 0, validadas = 0, contador[10] = ([10] 0);
-sem mutex = 1, mutexT = 1, mutexFuncion = 1, mutexCont = 1;
-bool fin = false;
+int pos = 0, validadas = 0, contador[10] = ([10] 0), idUltimo = -1;
+sem mutex = 1, mutexT = 1, mutexFuncion = 1, mutexCont[10] = ([10] 1);
 
 process worker[id: 0..6]{
     Transaccion t;
@@ -10,31 +9,27 @@ process worker[id: 0..6]{
     P(mutex)
     while (validadas < 10000){
         validadas++;
+        if (validadas == 10000){
+            idUltimo = id;
+        }
         V(mutex);
 
         P(mutexT);
         t = transacciones[pos];
-        pos = (pos+1) mod 10000;
+        pos++;
         V(mutexT);
 
-
-        P(mutexFuncion);
         res = Validar(t);
-        V(mutexFuncion)
 
-        P(mutexCont);
+        P(mutexCont[res]);
         contador[res]++;
-        V(mutexCont);
-
-       
-        P(mutex);
-        if (validadas == 10000){
-            for int i = 0..9 -> println(contador[i]);
-        }
-        V(mutex);
-       
+        V(mutexCont[res]);
 
         P(mutex)
     }
     V(mutex);
+
+    if(idUltimo == id){
+        for int i = 0..9 -> println(contador[i]);
+    }
 }

@@ -1,0 +1,29 @@
+1)
+sem mutex = 1;
+
+process controladores[id: 0..14]{
+    Temperatura t;
+    int tiempoDeEspera = ...;
+    while(true){
+        t = medir();
+        P(mutex);
+        Push(cola,(id,temp));
+        V(mutex);
+        V(hayPedido);
+        P(espera[id]);
+        actuar(accion[id]);
+        Delay(tiempoDeEspera);
+    }
+}
+
+process modulo[id: 0..1]{
+    int aux,temp;
+    while (true){
+        P(hayPedido);
+        P(mutex);
+        P(cola,(aux,temp));
+        V(mutex);
+        accion[aux] = determinar(temp);
+        V(espera[aux]);
+    }
+}

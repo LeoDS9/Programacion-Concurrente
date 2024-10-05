@@ -1,7 +1,7 @@
 process alumno[id: 0..44]{
     text enunciado, examen;
     int nota;
-    Examen.llegar(id);
+    Examen.llegar();
     Examen.esperarEnunciado(enunciado);
     //resolver examen;
     Escritorio.entregarExamen(id,examen);
@@ -31,7 +31,7 @@ monitor Examen{
     int cant = 0;
     text enunciado;
 
-    Procedure llegar(id: in int){
+    Procedure llegar(){
         cant++;
         if (cant == 45)
             signal(esperaP);

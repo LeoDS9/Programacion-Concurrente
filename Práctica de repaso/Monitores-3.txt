@@ -1,5 +1,5 @@
 process Escalador[id: 0..29]{
-    Paso.llegar(id);
+    Paso.llegar();
     //usar Paso
     Paso.liberar();
 }

@@ -1,0 +1,87 @@
+1)
+sem mutex = 1, esperando = 0, espera[20] = ([20] 0), abandonar = 0;
+Cola cola;
+Comprobante comprobantes[20];
+
+process vehiculo[id: 0..19]{
+    P(mutex);
+    Push(cola,id);
+    V(mutex);
+    V(esperando);
+    P(espera[id]);
+    //obtiene comprobante de comprobantes[id]
+    V(abandonar)
+}
+
+process empleado{
+    int idV;
+    for int i = 1..20{
+        P(esperando);
+        P(mutex);
+        Pop(cola,idV);
+        V(mutex);
+        comprobantes[idV] = verificar(idV);
+        P(abandonar);
+    }
+}
+
+
+
+2)
+
+process Persona[id: 0..N-1]{
+    Solicitud s;
+    Resultado res;
+    Oficina.llegar(id,s);
+    Oficina.obtenerResultado(id,res);
+}
+
+process empleado{
+    Solicitud s;
+    int idP;
+    Resultado res;
+    for int i = 1..N{
+        Oficina.esperarPersona();
+        Oficina.obtenerSolicitud(idP,s);
+        res = resolverTramite(s);
+        Oficina.entregarResultado(idP,res);
+    }
+}
+
+
+monitor Oficina{
+    Cola cola;
+    cond espera[N], esperaEmp;
+    int esperando = 0;
+    Resultado res[N];
+
+    Procedure llegar(id: in int, s: in Solicitud){
+        Push(cola,(id,s));
+        esperando++;
+        signal(esperaEmp);
+        
+    }
+
+    Procedure obtenerResultado(id: in int, r: out Resultado){
+        wait(espera[id]);
+        r = res[id];
+    }
+
+    Procedure esperarPersona(leer){
+        if (esperando == 0){
+            Delay(10);
+            wait(esperaEmp);
+        }
+    }
+
+    Procedure obtenerSolicitud(idP: out int, s: out Solicitud){
+        Pop(cola, (idP,s));
+        esperando--;
+    }
+
+    Procedure entregarResultado(idP: in int, r: in Resultado){
+        res[idP] = r;
+        signal(espera[idP]);
+    }
+    
+}
