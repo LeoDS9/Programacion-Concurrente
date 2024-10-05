@@ -46,8 +46,7 @@ process Boleteria{
     int entrada, idP;
 
     for int i = 1..P{
-        Venta.esperandoPersona();
-        Venta.obtenerPersona(idP);
+        Venta.esperandoPersona(idP);
         entrada = Vender(idP); //si hay entradas devuelve el nro de entrada, si no devuelve -1
         Venta.enviarNroEntrada(idP,entrada);
     }
@@ -67,16 +66,12 @@ monitor Venta{
     }
 
 
-    process esperandoPersona{
+    process esperandoPersona(idP: out int){
         if (esperando == 0)
             wait(esperaB);
-    }
-
-    process obtenerPersona(idP: out int){
         Pop(cola,idP);
         esperando--;
     }
-
 
     process enviarNroEntrada(idP: in int, e: in int){
         entrada[idP] = e;
