@@ -38,13 +38,20 @@ process Persona[id: 0..N-1]{
 
 process empleado{
     Solicitud s;
-    int idP;
+    int idP, atendidos = 0;
     Resultado res;
-    for int i = 1..N{
-        Oficina.esperarPersona();
-        Oficina.obtenerSolicitud(idP,s);
-        res = resolverTramite(s);
-        Oficina.entregarResultado(idP,res);
+    bool leer = true;
+
+    while (atendidos < N){
+        Oficina.esperarPersona(leer);
+        if(leer)
+            Delay(10);
+        else{
+            Oficina.obtenerSolicitud(idP,s);
+            res = resolverTramite(s);
+            Oficina.entregarResultado(idP,res);
+            atendidos++;
+        }
     }
 }
 
@@ -58,16 +65,15 @@ monitor Oficina{
     Procedure llegar(id: in int, s: in Solicitud, r: out Resultado){
         Push(cola,(id,s));
         esperando++;
-        signal(esperaEmp);
         wait(espera[id]);
         r = res[id];
     }
 
-    Procedure esperarPersona(leer){
-        if (esperando == 0){
-            Delay(10);
-            wait(esperaEmp);
-        }
+    Procedure esperarPersona(leer: out bool){
+        if (esperando > 0)
+            leer = false;
+        else
+            leer = true;
     }
 
     Procedure obtenerSolicitud(idP: out int, s: out Solicitud){
