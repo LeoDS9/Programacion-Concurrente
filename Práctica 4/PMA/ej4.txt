@@ -1,0 +1,45 @@
+
+
+process Cliente[id: 0..N-1]{
+    int cabina, pago;
+    send Llegada (id);
+    send Avanzar ()
+    receive Cabina[id] (cabina);
+    //usar cabina
+    send Liberar(id,cabina);
+    send Avanzar ()
+    receive Tickets[id] (ticket)
+}
+
+process Empleado{
+    int idC, cabAsig, cabinasLibres = 10, esperando = 0;
+    Cola cabinas; //tiene 10 cabinas;
+    Cola colaClientes;
+    text ticket;
+
+    while (true){
+        receive Avanzar ();
+        if (!empty(Liberar)){
+            receive Liberar(idC,cabAsig)
+            ticket = Cobrar(idC);
+            send Tickets[idC] (ticket)
+            if (esperando > 0){
+                Pop(colaClientes,idC);
+                send Cabina[idC] (cabAsig);
+            }else{
+                Push(cabinas,cabAsig);
+                cabinasLibres++;
+            }
+        }else{
+            receive Llegada(idC);
+            if (cabinasLibres > 0){
+                Pop(cabinas, cabAsig);
+                send Cabina[idC] (cabAsig);
+                cabinasLibres--;
+            }else{
+                Push(colaClientes,idC)
+                esperando++;
+            }
+        }
+    }
+}

@@ -1,0 +1,49 @@
+chan Pedidos (int,text), PedidosV (int), Siguiente[3] (int,text), Cocinar (int,text)
+
+
+process Cliente[id: 0..C-1]{
+    text pedido;
+    Comida comida;
+    send Pedidos (id,pedido);
+    receive Comidas[id] (comida)
+}
+
+process Coordinador{
+    int idC, idV;
+    text pedido;
+    while (true){
+        receive PedidosV (idV);
+        if (empty(Pedidos))
+            pedido = "nada";
+        else
+            receive Pedidos(idC,pedido);
+        send Siguiente[idV] (idC,pedido)
+    }
+}
+
+process Vendedor[id: 0..2]{
+    int idC;
+    text pedido;
+    while (true){
+        send PedidosV (id);
+        receive Siguiente[id] (idC,pedido);
+        if (pedido == "nada"){
+            tiempo = rand(1,3); //rand devuelve un entero dentro del rango dado por los extremos, incluyendolos
+            delay(tiempo); //simula que repone un pack de bebidas de la heladera
+        }
+        else
+            send Cocinar (idC,pedido);
+    }
+}
+
+process Cocinero[id: 0..1]{
+    int idC;
+    text pedido;
+    Comida comida;
+    while (true){
+        receive Cocinar (idC,pedido);
+        //cocina el pedido
+        send Comidas[idC] (comida)
+    }
+    
+}

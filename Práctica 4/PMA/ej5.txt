@@ -1,0 +1,150 @@
+a)
+chan Pedidos(text)
+process Administrativo[id: 0..N-1]{
+    text documento;
+    send Pedidos (documento);
+}
+
+process Impresora[id: 0..2]{
+    text documento;
+    int idA;
+    while (true){
+        receive Pedidos(documento);
+        //imprimir pedido
+    }
+}
+
+
+
+
+b)
+chan Pedidos(text), PedidosDirector(text), Siguiente[3] (text), PedidosImp(int);
+
+process Administrativo[id: 0..N-1]{
+    text documento;
+    send Pedidos (documento);
+}
+
+process Director{
+    text documento;
+    send PedidosDirector (documento);
+}
+
+process Coordinador{
+    int idImp;
+    text documento;
+    while (true){
+        receive PedidosImp(idImp);
+        if (!empty(PedidosDirector))
+            receive PedidosDirector (documento);
+        else
+            receive Pedidos (documento);
+        send Siguiente[idImp] (documento);
+    }
+}
+
+process Impresora[id: 0..2]{
+    text documento;
+    int idA;
+    while (true){
+        send PedidosImp (id);
+        receive Siguiente[id] (documento);
+        //imprimir pedido
+    }
+}
+
+
+
+
+
+c)
+chan Pedidos(int,text), PedidosImp(int), Siguiente[3] (text), Terminar (bool);
+process Administrativo[id: 0..N-1]{
+    text documentos[10];
+    for [int i = 0 to 9]{
+        send Pedidos (id,documentos[i]);
+    }
+}
+
+process Coordinador{
+    text documento;
+    int idImp, idA, contador[N] = ([N] 0), cantAdministrativos = 0;
+    while(cantAdministrativos < N){
+        receive PedidosImp(idImp);
+        receive Pedidos(idA,documento);
+        send Siguiente[idImp] (documento);
+        contador[idA]++;
+        if (contador[idA] == 10)
+            cantAdministrativos++;
+        if (cantAdministrativos == N)
+            for int i = 1..3 -> send Terminar (true)
+        else
+            for int i = 1..3 -> send Terminar (false)
+    }
+}
+
+process Impresora[id: 0..2]{
+    text documento;
+    int idA;
+    bool fin = false;
+    while (!fin){
+        send PedidosImp(id);
+        receive Siguiente[id] (documento)
+        //imprimir pedido
+        receive Terminar (fin)
+    }
+}
+
+
+
+
+d)
+chan Pedidos(int,text), PedidosDirector(text), PedidosImp(int), Siguiente[3] (text), Terminar (bool);
+
+process Administrativo[id: 0..N-1]{
+    text documentos[10];
+    for [int i = 0 to 9]{
+        send Pedidos (id,documentos[i]);
+    }
+}
+
+process Director{
+    text documentos[10];
+    for [int i = 0 to 9]{
+        send PedidosDirector (documentos[i]);
+    }
+}
+
+process Coordinador{
+    text documento;
+    int idA, idImp, cantAdministrativos = 0, contadorDirector = 0, contador[N] = ([N] 0);
+    while (cantAdministrativos < N or contadorDirector < 10){
+        receive PedidosImp(idImp);
+        if (!empty(PedidosDirector)){
+            receive PedidosDirector(documento)
+            contadorDirector++;
+        }else{
+            receive Pedidos(idA,documento);
+            contador[idA]++;
+            if (contador[idA] == 10)
+                cantAdministrativos++;
+        }
+        send Siguiente[idImp] (documento)
+        if (cantAdministrativos == N and contadorDirector == 10)
+            for int i = 1..3 -> send Terminar (true)
+        else
+            for int i = 1..3 -> send Terminar (false)
+    }
+}
+
+
+process Impresora[id: 0..2]{
+    text documento;
+    bool fin = false;
+    while (!fin){
+        send PedidosImp(id);
+        receive Siguiente[id] (documento)
+        //imprimir pedido
+        receive Terminar (fin)
+    }
+}

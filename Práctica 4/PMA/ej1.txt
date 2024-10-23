@@ -1,0 +1,58 @@
+a)
+chan pedidos (text), resultados[N](text)
+
+process Cliente[id: 0..N-1]{
+    text documento, resultado;
+    send pedidos (id,documento)
+    receive resultados[id] (resultado)
+}
+
+process Empleado{
+    text doc, res;
+    int idC;
+    while (true){
+        receive pedidos (idC,doc)
+        res = generar resultados
+        send resultados[idC] (res)
+    }
+}
+
+b) Solo hay que añadir [id: 0..1] a Empleado
+
+c) 
+chan pedidos (int), resultados[N](text), documentos (text), siguiente[2] (text)
+
+process Cliente[id: 0..N-1]{
+    text documento, resultado;
+    send documentos (id,documento)
+    receive resultados[id] (resultado)
+}
+
+process Coordinador{
+    text doc;
+    int idE, idC;
+    while (true){
+        receive pedidos (idE);
+        if (empty(documentos))
+            doc = "vacio";
+        else
+            receive documentos (idC,doc);
+        send siguiente[idE] (idC,doc)
+    }
+}
+
+
+process Empleado[id: 0..1]{
+    text doc, res;
+    int idC;
+    while (true){
+        send pedidos (id)
+        receive siguiente[id] (idC,doc)
+        if (doc == "vacio")
+            delay(15);
+        else{
+            res = generar resultados
+            send resultados[idC] (res)
+        }
+    }
+}

@@ -1,0 +1,43 @@
+chan Pagos[5] (int), Comprobantes[P] (text), Atencion[5] (int), Llegada (int), Colas[P] (int), Liberar (int,int), Avanzar ()
+
+process Cliente[id: 0..P-1]{
+    int cola, pago = ...;
+    text comprobante;
+    send Llegada (id);
+    send Avanzar ();
+    receive Colas[id] (cola);
+    send Atencion[Cola] (id);
+    send Pagos[id] (pago);
+    receive Comprobantes[id] (comprobante);
+    send Liberar (id,colaAsig);
+    send Avanzar ()
+}
+
+process Coordinador{
+    int colaAsig, id;
+    Cola cola[5];
+    bool ok;
+    while (true){
+        receive Avanzar ();
+        if (!empty(Llegada)){
+            receive Llegada (id);
+            colaAsig = obtenerColaMenosPersonas(cola);
+            Push(cola[colaAsig],id);
+            send Colas[id] (colaAsig)
+        }else{
+            receive Liberar(id,colaAsig)
+            Pop(cola[colaAsig])
+        }
+    }
+}
+
+process Cajero[id: 0..4]{
+    int idC, pago;
+    text comprobante;
+    while (true){
+        receive Atencion[id] (idC);
+        receive Pagos[idC] (pago);
+        comprobante = generar comprobante
+        send Comprobantes[idC] (comprobante)
+    }
+}
