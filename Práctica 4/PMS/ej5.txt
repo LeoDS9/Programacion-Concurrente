@@ -1,0 +1,25 @@
+process Espectador[id: 0..E-1]{
+    Admin!(id);
+    Maquina?avanzar();
+    //usar maquina
+    Maquina!terminar();
+}
+
+process Admin{
+    int idE;
+    Cola fila;
+    do
+        Espectador[*]?(idE) -> push(fila,idE);
+        !empty(fila); Maquina?pedido() -> Maquina!espectador(pop(fila));
+    od
+}
+
+process Maquina{
+    int idE;
+    while (true){
+        Admin!pedido();
+        Admin!espectador(idE)
+        Espectador[idE]!avanzar();
+        Espectador?terminar();
+    }
+}

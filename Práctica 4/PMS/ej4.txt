@@ -1,0 +1,47 @@
+a)
+
+process Persona[id: 0..P-1]{
+    Empleado!pedido(id);
+    Empleado?avanzar();
+    //usar maquina
+    Empleado!liberar();
+}
+
+process Empleado{
+    int idP;
+    while (true){
+        Persona[*]?pedido(idP);
+        Persona[idP]!avanzar();
+        Persona[idP]?liberar();
+    }
+}
+
+
+
+b)
+
+process Persona[id: 0..P-1]{
+    Admin!(id);
+    Empleado?avanzar();
+    //usar maquina
+    Empleado!liberar();
+}
+
+process Admin{
+    Cola fila;
+    int idP;
+    do
+        Persona[*]?(idP) -> Push(fila,idP);
+        !empty(fila); Empleado?pedido() -> Empleado!persona(Pop(fila));
+    od
+}
+
+process Empleado{
+    int idP;
+    while (true){
+        Admin!pedido();
+        Admin?persona(idP)
+        Persona[idP]!avanzar();
+        Persona[idP]?liberar();
+    }
+}

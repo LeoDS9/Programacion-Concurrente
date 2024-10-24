@@ -1,0 +1,31 @@
+b)
+
+process Examinador[id: 0..R-1]{
+    String direccion;
+    while (true){
+        //buscar la direccion de un sitio web infectado
+        Admin?(direccion);
+    }
+}
+
+process Admin{
+    String dir;
+    Cola buffer;
+    do
+        Examinador[*]?(dir) -> push(buffer,dir);
+        !empty(buffer); Analizador?pedido() -> Analizador!direccion (pop(buffer));
+    od
+}
+
+process Analizador{
+    String direccion;
+    while (true){
+        Admin!pedido()
+        Admin?direccion(direccion)
+        // analizar direccion
+    }
+}
+
+
+
+

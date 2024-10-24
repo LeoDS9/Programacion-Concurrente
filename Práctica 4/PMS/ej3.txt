@@ -1,0 +1,116 @@
+a)
+process Alumno[id: 0..N-1]{
+    text examen;
+    int nota;
+    //resolver examen
+    Admin!(id,examen);
+    Profesor?(nota)
+}
+
+process Admin{
+    Cola fila;
+    int idA, cantAl = 0;
+    text examen;
+    do
+        (cantAl < N); Alumno[*]?(id,examen) -> Push(fila,(idA,examen)); 
+                                               cantAl++;
+        !empty(fila); Profesor?pedido() -> Pop(fila,(idA,examen));
+                                           Profesor!examen(idA,examen);
+    od
+}
+
+process Profesor{
+    int idA, nota;
+    text examen;
+    for [int i = 1..N]{
+        Admin!pedido();
+        Admin?examen(idA,examen);
+        //corregir examen
+        Alumno[idA]!(nota)
+    }
+}
+
+
+
+
+b)
+process Alumno[id: 0..N-1]{
+    text examen;
+    int nota;
+    //resolver examen
+    Admin!(id,examen);
+    Profesor?(nota)
+}
+
+process Admin{
+    Cola fila;
+    int idA,idP, cantAl = 0;
+    text examen;
+    do
+        (cantAl < N); Alumno[*]?(id,examen) -> Push(fila,(idA,examen)); 
+                                               cantAl++;
+        !empty(fila); Profesor[*]?pedido(idP) -> Pop(fila,(idA,examen));
+                                                 Profesor[idP]!examen(idA,examen);
+    od
+}
+
+process Profesor[id: 0..P-1]{
+    int idA, nota;
+    text examen;
+    for [int i = 1..N]{
+        Admin!pedido(id);
+        Admin?examen(idA,examen);
+        //corregir examen
+        Alumno[idA]!(nota)
+    }
+}
+
+
+
+
+c)
+process Alumno[id: 0..N-1]{
+    text examen;
+    int nota;
+    Barrera!avanzar();
+    Barrera?empezar();
+    //resolver examen
+    Admin!(id,examen);
+    Profesor?(nota)
+}
+
+
+process Barrera{
+    int cantAl = 0, idA;
+    Cola buffer;
+    while (cantAl < N){
+        Alumno[*]?avanzar();
+        cantAl++;
+    }
+    for [int i = 0..N-1]{
+        Alumno[i]!empezar()
+    }
+}
+
+process Admin{
+    Cola fila;
+    int idA,idP,cantAl = 0;
+    text examen;
+    do
+        (cantAl < N); Alumno[*]?(id,examen) -> Push(fila,(idA,examen));
+                                               cantAl++;
+        !empty(fila); Profesor[*]?pedido(idP) -> Pop(fila,(idA,examen));
+                                                 Profesor[idP]!examen(idA,examen);
+    od
+}
+
+process Profesor[id: 0..P-1]{
+    int idA, nota;
+    text examen;
+    for [int i = 1..N]{
+        Admin!pedido(id);
+        Admin?examen(idA,examen);
+        //corregir examen
+        Alumno[idA]!(nota)
+    }
+}

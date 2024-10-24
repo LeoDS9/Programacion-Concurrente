@@ -1,0 +1,40 @@
+process Preparador{
+    ADN muestra;
+    while (true){
+        //preparar muestra de ADN
+        Admin!(muestra);
+    }
+}
+
+process Admin{
+    Cola buffer;
+    ADN muestra;
+    do
+        Preparador?(muestra) -> Push(buffer,muestra);
+        !empty(buffer); Armador?pedido() -> Armador!muestra(Pop(buffer));
+    od
+}
+
+process Armador{
+    ADN muestra;
+    SetAnalisis set;
+    String res;
+    while (true){
+        Admin!pedido();
+        Admin?muestra(muestra);
+        //armar set de analisis
+        Analizador!set(set)
+        Analizador?resultado(res)
+        //archivar resultado
+    }
+}
+
+process Analizador{
+    SetAnalisis set;
+    String resultado;
+    while (true){
+        Armador?set(set);
+        //realizar analisis y obtener resultado
+        Armador!resultado(resultado)
+    }
+}
