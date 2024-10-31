@@ -33,12 +33,17 @@ procedure ej4 is
     end Escritorio;
 
     task body Persona is
+        contador : integer := 0;
+        atendido : boolean := false;
     begin
-        select
-            Medico.pedido_persona();
-        or delay 300
-            null;
-        end select;
+        while (contador < 3) or (atendido) loop
+            select
+                Medico.pedido_persona();
+            or delay 300
+                delay 600;
+                contador := contador + 1;
+            end select;
+        end loop;
     end Persona;
     
     task body Enfermera is

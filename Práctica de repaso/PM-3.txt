@@ -4,14 +4,20 @@ process Persona[id: 0..P-1]{
     bool embarazada = ...;
     int dinero = ..., cantBoletas = ..., vuelto;
     text boletas, recibo;
-    if (embarazada)
+    if (embarazada){
         send PedidosEmbarazadas (id,boletas,dinero);
+        send Avanzar()
+    }
     else
-        if (cantBoletas < 5)
+        if (cantBoletas < 5){
             send PedidosMenos5Boletas (id,boletas,dinero);
-        else
+            send Avanzar()
+        }
+        else{
             send Pedidos (id,boletas,dinero);
-    Resultado[id] (vuelto,recibo);
+            send Avanzar()
+        }
+    receive Resultado[id] (vuelto,recibo);
 }
 
 
