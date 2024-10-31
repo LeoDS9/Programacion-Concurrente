@@ -1,0 +1,27 @@
+process Persona[id: 0..P-1]{
+    Terminal!pedido(id);
+    Terminal?avanzar();
+    //usar Terminal
+    Terminal!terminar()
+}
+
+process Terminal{
+    Cola fila;
+    int idP;
+    bool libre = true;
+    do
+        Persona[*]?pedido(idP) -> if (not libre)
+                                        Push(fila,idP);
+                                     else{
+                                        libre = false;
+                                        Persona[idP]!avanzar();
+                                     }
+
+        Persona[*]?terminar() -> if (empty(fila))
+                                        libre = true;
+                                    else{
+                                        Pop(fila,idP);
+                                        Persona[idP]!avanzar();
+                                    }
+    od
+}

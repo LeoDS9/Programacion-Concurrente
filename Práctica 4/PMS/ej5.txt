@@ -1,25 +1,27 @@
 process Espectador[id: 0..E-1]{
-    Admin!(id);
+    Maquina!(id);
     Maquina?avanzar();
     //usar maquina
     Maquina!terminar();
 }
 
-process Admin{
-    int idE;
-    Cola fila;
-    do
-        Espectador[*]?(idE) -> push(fila,idE);
-        !empty(fila); Maquina?pedido() -> Maquina!espectador(pop(fila));
-    od
-}
-
 process Maquina{
     int idE;
-    while (true){
-        Admin!pedido();
-        Admin!espectador(idE)
-        Espectador[idE]!avanzar();
-        Espectador?terminar();
-    }
+    Cola fila;
+    bool libre = true;
+    do
+        Espectador[*]?pedido(idE) -> if (not libre)
+                                        Push(fila,idE);
+                                     else{
+                                        libre = false;
+                                        Espectador[idE]!avanzar();
+                                     }
+
+        Espectador[*]?terminar() -> if (empty(fila))
+                                        libre = true;
+                                    else{
+                                        Pop(fila,idE);
+                                        Espectador[idE]!avanzar();
+                                    }
+    od
 }

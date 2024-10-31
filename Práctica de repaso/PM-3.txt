@@ -1,0 +1,37 @@
+chan Pedidos (int,text,int), PedidosMenos5Boletas (int,text,int), PedidosEmbarazadas (int,text,int), Resultado[P] (int,text);
+
+process Persona[id: 0..P-1]{
+    bool embarazada = ...;
+    int dinero = ..., cantBoletas = ..., vuelto;
+    text boletas, recibo;
+    if (embarazada)
+        send PedidosEmbarazadas (id,boletas,dinero);
+    else
+        if (cantBoletas < 5)
+            send PedidosMenos5Boletas (id,boletas,dinero);
+        else
+            send Pedidos (id,boletas,dinero);
+    Resultado[id] (vuelto,recibo);
+}
+
+
+
+process Cajero{
+    Cola fila;
+    int idP, dinero, vuelto;
+    text boletas, recibo;
+    while (true){
+        receive Avanzar();
+        if (!empty(PedidosEmbarazadas)) 
+             receive PedidosEmbarazadas (idP,boletas,dinero);
+        else
+            if !empty(PedidosMenos5Boletas)
+                receive PedidosMenos5Boletas (idP,boletas,dinero);
+            else
+                receive Pedidos (idP,boletas,dinero);
+
+        //generar vuelto y recibo
+
+        Resultado[idP] (vuelto,recibo)
+    }
+}

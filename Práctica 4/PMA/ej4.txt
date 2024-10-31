@@ -1,7 +1,8 @@
-
+chan Avanzar (), Llegada (int), Cabina[N] (int), Liberar (int,int), Tickets[N] (text)
 
 process Cliente[id: 0..N-1]{
     int cabina, pago;
+    text ticket;
     send Llegada (id);
     send Avanzar ()
     receive Cabina[id] (cabina);

@@ -1,0 +1,64 @@
+a)
+chan Pedidos (int, text), PedidosImp (int), Siguiente[5] (int,text), Resultado[100] (text);
+
+process Empleado[id: 0..99]{
+    text documento, copia;
+    send Pedidos (id, documento);
+    receive Resultado[id] (copia);
+}
+
+process Admin{
+    text doc;
+    int idImp, idE;
+    while (true){
+        receive PedidosImp (idImp);
+        receive Pedidos (idE,doc);
+        send Siguiente[idImp] (idE,doc);
+    }
+}
+
+process Impresora[id: 0..4]{
+    int idE;
+    text doc, copia;
+    while (true){
+        send PedidosImp (id);
+        receive Siguiente[id] (idE,doc);
+        //imprimir doc
+        send Resultado[idE] (copia);
+    }
+}
+
+
+
+
+
+b)
+
+process Empleado[id: 0..99]{
+    text documento, copia;
+    Admin!(id,documento);
+    Impresora[*]?copia(copia)
+}
+
+process Admin{
+    Cola pedidos;
+    int id, idImp;
+    text doc;
+    do
+        Empleado[*]?(id,doc) -> Push(pedidos, (id,doc));
+        
+        !(empty(pedidos)); Impresora[*]?pedido(idImp) -> Pop(pedidos, (id,doc));
+                                                          Impresora[idImp]!documento(id,doc);
+    endo
+}
+
+process Impresora[id: 0..4]{
+    text doc, copia;
+    int idE;
+    while (true){
+        Admin!pedido (id);
+        Admin?documento(idE,doc);
+        //imprimir doc
+        Empleado[idE]!(copia);
+    }
+}
