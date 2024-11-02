@@ -7,7 +7,7 @@ procedure ej4 is
 
     task Escritorio is
         entry dejar_nota(nota: IN text);
-        entry leer_nota();
+        entry leer_nota(nota: OUT text);
     end Escritorio;
 
     task Persona;
@@ -24,8 +24,8 @@ procedure ej4 is
                     notas.push(nota);
                 end dejar_nota;
             or
-                when(!empty(notas)) =>
-                    accept leer_nota() do
+                when(not empty(notas)) =>
+                    accept leer_nota(nota: OUT text) do
                         nota = notas.pop(nota);
                     end leer_nota;
             end select;
@@ -36,9 +36,10 @@ procedure ej4 is
         contador : integer := 0;
         atendido : boolean := false;
     begin
-        while (contador < 3) or (atendido) loop
+        while (contador < 3) and (not atendido) loop
             select
                 Medico.pedido_persona();
+                atendido := true;
             or delay 300
                 delay 600;
                 contador := contador + 1;
