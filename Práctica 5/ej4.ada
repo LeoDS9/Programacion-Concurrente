@@ -74,14 +74,13 @@ procedure ej4 is
                     accept pedido_enfermera(papel: IN/OUT text) do
                         firmar_papel(papel);
                     end pedido_enfermera;
-            or
-                when(pedido_persona'count = 0) and (pedido_enfermera'count = 0) =>
-                    select
-                         Escritorio.leer_nota(nota);
-                         procesar_nota(nota);
-                    else
-                        null;
-                    end select;
+            else
+                select
+                    Escritorio.leer_nota(nota);
+                    procesar_nota(nota);
+                else
+                    null;
+                end select;
             end select;
         end loop;
 begin
