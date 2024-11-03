@@ -1,0 +1,27 @@
+process Turista[id: 0..19]{
+    Empleado!llegar();
+    Empleado?terminar();
+    Guia!pedido(id);
+    Guia!usar();
+    UsarTirolesa();
+    Guia!liberar();
+}
+
+process Empleado{
+    for i = 1..20{
+        Turista[*]?llegar();
+    }
+    DarCharla();
+    for i = 0..19{
+        Turista[i]!terminar();
+    }
+}
+
+process Guia{
+    int idT;
+    for i = 1..20{
+        Turista[*]?pedido(idT);
+        Turista[idT]!usar();
+        Turista[idT]!terminar();
+    }
+}

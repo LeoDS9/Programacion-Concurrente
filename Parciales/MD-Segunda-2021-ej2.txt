@@ -1,0 +1,33 @@
+chan Errores (Error), Siguiente[3] (Error), Pedidos (int);
+
+process Cliente[id:0..N-1]{
+    while (true){
+        //buscar error
+        send Errores (error)
+    }
+}
+
+process Coordinador{
+    int idP, idC;
+    Error error;
+    while (true){
+        receive Pedidos (idP);
+        if (!empty(Errores))
+            error = "vacio";
+        else
+            receive Errores (error);
+        send Siguiente[idP] (error);
+    }
+}
+
+process Programador[id: 0..2]{
+    Error error;
+    while (true){
+        send Pedidos (id);
+        receive Siguiente[id] (error);
+        if (error = "vacio")
+            Programar();
+        else
+            ResolverError(error);
+    }
+}
