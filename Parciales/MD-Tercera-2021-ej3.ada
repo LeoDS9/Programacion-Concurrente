@@ -3,7 +3,6 @@ procedure ej3 is
 
     clientes: array(1..N) of Cliente;
 
-
     task body Cliente is
         embarazada: boolean;
         anciana: boolean;
@@ -52,5 +51,5 @@ procedure ej3 is
         end loop;
     end Empleado;
 begin
-    
+    null;
 end ej3;
